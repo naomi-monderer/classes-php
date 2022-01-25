@@ -2,7 +2,7 @@
 if(!isset($_SESSION))
 {
     session_start();
-    var_dump($_SESSION);
+    
 }
 require 'user.php';
 $user = new User();
@@ -28,47 +28,51 @@ $user = new User();
         <input type="email" name="email" placeholder="email">
         <input type="password" name="password" placeholder="MDP">
         <input type="password" name="password2" placeholder="confirmez MDP">
-        <input type="submit" name="submit" value="valider">
-        <?php
-
-        // if (isset($_POST['submit'])) {
-        //     $user->register($_POST['login'], $_POST['password'], $_POST['password2'], $_POST['email'], $_POST['firstname'], $_POST['lastname']);
-        // }
-
-        ?>
+        <input type="submit" name="submit" value="s'inscrire">
+    
     </form>
 
-    <form action="" methode="post">
+    <form action="" methode="get">
         <input type="text" name="login" placeholder="identifiant">
         <input type="password" name="password" placeholder="MDP">
-        <input type="submit" name="submitCo" value="valider">
+        <input type="submit" name="submitCo" value="se connecter">
     </form>
 
-    <form action="" methode="post">
+    <form action="" method="post">
+        <input type="text" name="login"  value = <?php echo $_SESSION['dataUser']['login'];?> >
+        <input type="text" name="firstname" value = <?php echo $_SESSION['dataUser']['firstname'];?> >
+        <input type="text" name="lastname"  value=<?php echo $_SESSION['dataUser']['lastname'];?>>
+        <input type="email" name="email"  value=<?php echo $_SESSION['dataUser']['email'];?>>
+        <input type="submit" name="submitUpdate" value="update">
+    </form>
+
+    <form action="" method="post">
     <input type='submit' name='deconnexion' value="deco">
     </form>
 
     <?php
-     if(isset($_POST['submitCo']))
+    if (isset($_POST['submit']))
     {
-        $_POST['login'] = "mae";
-        $_POST['password'] = "mae";
-       $retourDeLaFonction = $user->connect($_POST['login'],$_POST['password']);
-     }
-    
-    
-    if(isset($_POST['submitCo']))
-     {    echo "<h1>".$retourDeLaFonction."</h1>"; 
-      }
-    
+        $RetourFonctionInscription = $user->register($_POST['login'],$_POST['password'],$_POST['password2'],$_POST['email'],$_POST['firstname'],$_POST['lastname']);
+    }
 
-      if(isset($_POST['deconnexion']))
+     if(isset($_GET['submitCo']))
+    {
+       //$retourDeLaFonction = 
+       $user->connect($_GET['login'],$_GET['password']);
+     }
+
+    if(isset($_POST['deconnexion']))
       {
         $retourDeconnexion = $user->disconnect();
       }
 
-
-      $retourDelete = $user->delete();
+    if(isset($_POST['submitUpdate']))
+    {
+        $user->update($_POST['login'],$_POST['email'],$_POST['firstname'],$_POST['lastname']);
+    }
+    
+    $user->getAllInfos();
 
     ?>
 </body>

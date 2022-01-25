@@ -23,25 +23,21 @@ class User
     // ici dans mon construct c'est une fonction qui est automatiquement 
     // lancée quand la classe est instanciée dans la page où je souhaite avoir accès à mes fonctions.
     public function __construct()
-    {   $bdd = mysqli_connect("localhost", "root", "root", "classes");
-        // $this->id = $id;
-        // $this->login = $login;
-        // $this->email = $email;
-        // $this->firstname = $firstname;
-        // $this->lastname = $lastname;
-        // $this->bdd = $bdd;
+    {   
+        $bdd = mysqli_connect("localhost", "root", "root", "classes");
+        $this->bdd = $bdd;
+      
   
     }
         // ici je stock ma variable bdd ou il y a ma fonction de connexion à la bdd
         // et je la stocke ensuite dans mes attributs pour m'en servir comme pipeline pour les autres fonction
         
 
-
     /**
      * Ma fonction register qui permet aux utilisateurs de s'incrire sur la BDD
      */
     public function register($login, $password, $passwordConfirm, $email, $firstname, $lastname)
-    {
+    {   
         // je récupère la connexion à la base de donnée qui est set dans le construct
         $bdd = $this->bdd;
 
@@ -77,7 +73,8 @@ class User
             // ici je vérifie bien que la requete que jexecute un peu plus haut à la ligne 65 me retourne aucune ligne,
             // si il me retourne aucune ligne c'est que en bdd il n'existe encore aucun user qui à cet adresse mail comme identifiant,
             // et à l'inverse si il m'en retourne c'est pas bon et du coup je le renvoie le message d'erreur un peu plus bas.
-            if (mysqli_num_rows($req) == 0) {
+            if (mysqli_num_rows($req) == 0)
+             {
 
                 // ici je vérifie que les mot de passe entrer par le user sont bien concordant (password est bien égale au password confirm)
                 if ($password == $passwordConfirm) {
@@ -97,13 +94,13 @@ class User
             return 'veuiller remplir tout les champs.';
         }
 
-        foreach($req as $user)
-        {
-            echo "<pre>";
-            echo $req['login'] . " ". $req['password'];
-            echo "</pre>";
+        // foreach($req as $user)
+        // {
+        //     echo "<pre>";
+        //     echo $req['login'] . " ". $req['password'];
+        //     echo "</pre>";
 
-        }
+        // }
     }
 
     public function connect($login, $password)
@@ -117,36 +114,37 @@ class User
         $login = trim($_login);
         $password = trim($_password);
         
-        $login = "mae";
-        $password = "mae";
 
         if (!empty($login) && !empty($password)) {
-            echo "yes0";
+           
             $req= "SELECT * FROM utilisateurs WHERE login = '$login'";
             $userExist =mysqli_query($bdd,$req);
             $dataUser=mysqli_fetch_assoc($userExist); // mysqli_fetch_assoc(mysqli_result($result));?
             // var_dump($dataUser);
 
-                if(isset($dataUser['login']) == 1)// je pense que les infos de l'utilisateurs sont contenues dans le resultat de ma requête  
+                if(isset($dataUser['login']))// je pense que les infos de l'utilisateurs sont contenues dans le resultat de ma requête  
                 {
-                    echo "yes";
-
+               
                     $passwordhash = $dataUser['password'];
                     //(ou bien $passworhash = $dataUser['password'];) ?
 
                     if(password_verify($password,$passwordhash))
                     {
-                        $_SESSION['dataUser'] = $dataUser; 
-                        echo "<pre>";
-                        var_dump($dataUser);
-                        echo "</pre>";
+                        $_SESSION['dataUser'] = $dataUser;
+                        $this->id = $dataUser['id'];
+                        
+                        
                         $this->login = $login;
                         $this->password = $password;
+                        $this->email = $dataUser['email'];
+                        $this->firstname = $dataUser['firstname'];
+                        $this->lastname = $dataUser['lastname'];
                         return "vous êtes connecté";
+                       
                     }
                     else
                     {
-                        return "le mot de passe est incorect.";
+                        return "le mot de passe est incorrect.";
                     }
                 }
                 else
@@ -166,7 +164,8 @@ class User
     public function disconnect()
     {   $bdd = $this->bdd;
 
-        if (isset($_SESSION['user']) && isset($_POST['deconnexion'])) {
+        if (isset($_SESSION['dataUser']) && isset($_POST['deconnexion'])) 
+        {
             session_destroy();
         }
         // Où est ce que je créais un boutton deconnexion? pour faire le test
@@ -176,65 +175,124 @@ class User
 
     public function delete()
     {
-        $bdd = $this->bdd;
-        
-        $query = mysqli_query($bdd, "DELETE FROM utilisateurs WHERE id='$this->login'");
-        $result = mysqli_fetch_assoc($query);
-        if ($query == 1) {
-            session_destroy();
+        if(isset($_SESSION['dataUser']))
+        {
+        $this->id = $_SESSION['dataUser']['id'];
+        $query = mysqli_query($this->bdd, "DELETE FROM utilisateurs WHERE id='$this->id'");
+        echo "OK, l'utilisateur de la sesssion en cours a bien été effacé de la bdd.";
+        session_destroy();
         }
     }
 
-    public function update($id, $login, $password, $email, $firstname, $lastname)
+    public function update($login, $email, $firstname, $lastname)
     {
+        if(isset($_SESSION['dataUser']))
+        {
+
+            // $query = mysqli_query($bdd,"SELECT * FROM utilisateurs");
+            // $result = mysqli_fetch_all($query);
+            $this->id = $_SESSION['dataUser']['id'];
+            $this->login = $login;
+            $this->email = $email;
+            $this->firstname = $firstname;
+            $this->lastname = $lastname;
+
+            $req = "UPDATE utilisateurs SET login = '$this->login',email='$this->email',firstname = '$this->firstname',lastname =' $this->lastname' WHERE id = '$this->id'";
+            $query2 = mysqli_query($this->bdd, $req);
+            $req2 = "SELECT * FROM utilisateurs where id = $this->id";
+            $query = mysqli_query($this->bdd, $req2);
+            $result2 = mysqli_fetch_all($query);
+        }
+
         
-        // $query = mysqli_query($bdd,"SELECT * FROM utilisateurs");
-        // $result = mysqli_fetch_all($query);
-        $req = "UPDATE utilisateurs SET login='$login',password='$password',email='$email',firstname='$firstname',lastname='$lastname' WHERE id='$id'";
-        $query2 = mysqli_query($bdd, $req);
-        $req = "SELECT * FROM utilisateurs where id='$id'";
-        $query = mysqli_query($bdd, $req);
-        $result2 = mysqli_fetch_all($query);
-
-        $this->id = $id;
-        $this->login = $login;
-        $this->email = $email;
-        $this->firstname = $firstname;
-        $this->lastname = $lastname;
-
+        
+//actualiser la session
         return $result2;
     }
 
-    public function isConnected() // est ce que je dois utiliser des post 
+    public function isConnected() // retourne un booleen permettant de savoir si un utilisateur est connecté ou non
     {
-        if (isset($_POST['submit'])) {
-            $bdd = mysqli_connect("localhost", "root", "root", "classes");
-            $userExist = mysqli_query($bdd, "SELECT * FROM utilisateurs WHERE login='$this->login'");
+       
+            $userExist = mysqli_query($this->bdd, "SELECT * FROM utilisateurs WHERE login='$this->login'");
             $resultUser = mysqli_fetch_all($userExist);
             // comment transmettre à ma requete que je veux l'argument $login?
-            if (isset($_POST['login']) == 1) {
-                $_SESSION['user'] = $resultUser;
+            if (isset($_POST['login']))
+            {
+                $_SESSION['dataUser'] = $resultUser;
+
             }
-        }
+            return true;
+        
     }
 
     public function getAllInfos()
     {
+        $req = mysqli_query ($this->bdd,"SELECT * FROM utilisateurs WHERE id = '$this->id'");
+        $resultUser = mysqli_fetch_assoc($req);
+       
+      
+            foreach($resultUser as $user)
+            {
+                echo '<pre>';
+                echo $user;
+                echo '</pre>';
+
+            }
+            //return ?
+        
+        
     }
 
-    // dans la fonction delete , dans ta query au lieu d'écrire $login t'écrira $this->login
-    // $query=mysqli_query($bdd,"SELECT login,password FROM utilisateurs WHERE id='$this->id'");
+    public function getLogin() //retourne le login de l’utilisateur
+    {
+        $login = $this->login;
+        echo $login;
+        
+        return $login;
+    }
+
+    public function getFirstname() //retourne Firstname de l’utilisateur
+    {
+        $firstname = $this->firstname;
+        echo $firstname;
+        
+        return $firstname;
+    }
+
+    public function getEmail() //retourne le l'email de l'utilisateur
+    {
+       $email = $this->email;
+       echo $email;
+       return $email;
+    }
+
+    public function getLastname() //retourne le Lastname de l’utilisateur
+    {
+       $lastname = $this->lastname;
+       echo $lastname;
+       return $lastname; 
+    }
+
 
 }
 
-// $objet = new User();
-// // $result = $objet->register(2,'Naomixx','1234','naomi@gmail.com','Naomi','Monderer');
-// // $result = $objet->register(3,'lala','1234','naomi@gmail.com','lala','lololo');
 
-// $result2 = $objet->update(3, 'lala', '1234', 'naomi@gmail.com', 'lala', 'lololo');
-// var_dump($result2);
-// // $objet->delete()
 
+
+
+$user = new User();
+$user->register('nao','naomiette','naomiette','naomi@gmail.com','naomi','monderer');
+$user->connect('nao','naomiette');
+
+// $user->disconnect();
+// $user->update('naomiette','naomi@ttt.com','lola','monderer');
+// $user->delete();
+//$user->isConnected();
+// $user->getAllInfos();
+$user->getLogin();
+$user->getEmail();
+$user->getFirstname();
+$user->getLastname();
 
 ?>
 
