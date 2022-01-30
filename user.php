@@ -1,7 +1,4 @@
 <?php
-/* CREER UNE CLASSE */
-// $id,$login,$password,$email,$firstname,$lastname,$bdd
-
 
 class User
 {
@@ -114,6 +111,7 @@ class User
         $login = trim($_login);
         $password = trim($_password);
         
+      
 
         if (!empty($login) && !empty($password)) {
            
@@ -121,15 +119,16 @@ class User
             $userExist =mysqli_query($bdd,$req);
             $dataUser=mysqli_fetch_assoc($userExist); // mysqli_fetch_assoc(mysqli_result($result));?
             // var_dump($dataUser);
-
+            
                 if(isset($dataUser['login']))// je pense que les infos de l'utilisateurs sont contenues dans le resultat de ma requête  
-                {
+                {  
                
                     $passwordhash = $dataUser['password'];
                     //(ou bien $passworhash = $dataUser['password'];) ?
 
                     if(password_verify($password,$passwordhash))
-                    {
+                    { 
+                      
                         $_SESSION['dataUser'] = $dataUser;
                         $this->id = $dataUser['id'];
                         
@@ -139,7 +138,13 @@ class User
                         $this->email = $dataUser['email'];
                         $this->firstname = $dataUser['firstname'];
                         $this->lastname = $dataUser['lastname'];
+                        echo "<pre>";
+                        var_dump($_SESSION);
+                        echo "</pre>";
+
+                        echo "vous êtes connecté";
                         return "vous êtes connecté";
+                        
                        
                     }
                     else
@@ -203,11 +208,7 @@ class User
             $query = mysqli_query($this->bdd, $req2);
             $result2 = mysqli_fetch_all($query);
         }
-
-        
-        
-//actualiser la session
-        return $result2;
+            return $result2;
     }
 
     public function isConnected() // retourne un booleen permettant de savoir si un utilisateur est connecté ou non
@@ -219,8 +220,12 @@ class User
             if (isset($_POST['login']))
             {
                 $_SESSION['dataUser'] = $resultUser;
+                echo "la methode isConnected est active";
 
             }
+            echo "<pre>";
+            var_dump($resultUser);
+            echo "</pre>";
             return true;
         
     }
@@ -238,7 +243,14 @@ class User
                 echo '</pre>';
 
             }
-            //return ?
+
+            $login = $this->login;
+            $password = $this->password;
+            $email = $this->email;
+            $firstname = $this->firstname;
+            $lastname = $this->lastname;
+    
+            return[$login,$password,$email,$firstname,$lastname];
         
         
     }
@@ -281,18 +293,18 @@ class User
 
 
 $user = new User();
-$user->register('nao','naomiette','naomiette','naomi@gmail.com','naomi','monderer');
+// $user->register('nao','naomiette','naomiette','naomi@gmail.com','naomi','monderer');
 $user->connect('nao','naomiette');
 
 // $user->disconnect();
 // $user->update('naomiette','naomi@ttt.com','lola','monderer');
 // $user->delete();
-//$user->isConnected();
+// $user->isConnected();
 // $user->getAllInfos();
-$user->getLogin();
-$user->getEmail();
-$user->getFirstname();
-$user->getLastname();
+// $user->getLogin();
+// $user->getEmail();
+// $user->getFirstname();
+// $user->getLastname();
 
 ?>
 

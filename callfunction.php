@@ -4,10 +4,8 @@ if(!isset($_SESSION))
     session_start();
     
 }
-require 'user.php';
-$user = new User();
-
-
+require 'user-pdo.php';
+$user = new Userpdo();
 ?>
 
 <!DOCTYPE html>
@@ -18,6 +16,7 @@ $user = new User();
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <?php include('user-pdo.php')?>
 </head>
 
 <body>
@@ -53,26 +52,26 @@ $user = new User();
     <?php
     if (isset($_POST['submit']))
     {
-        $RetourFonctionInscription = $user->register($_POST['login'],$_POST['password'],$_POST['password2'],$_POST['email'],$_POST['firstname'],$_POST['lastname']);
+        $RetourFonctionInscription = $userpdo->register($_POST['login'],$_POST['password'],$_POST['password2'],$_POST['email'],$_POST['firstname'],$_POST['lastname']);
     }
 
-     if(isset($_GET['submitCo']))
-    {
-       //$retourDeLaFonction = 
-       $user->connect($_GET['login'],$_GET['password']);
-     }
+    //  if(isset($_GET['submitCo']))
+    // {
+    //    //$retourDeLaFonction = 
+    //    $user->connect($_GET['login'],$_GET['password']);
+    //  }
 
-    if(isset($_POST['deconnexion']))
-      {
-        $retourDeconnexion = $user->disconnect();
-      }
+    // if(isset($_POST['deconnexion']))
+    //   {
+    //     $retourDeconnexion = $user->disconnect();
+    //   }
 
-    if(isset($_POST['submitUpdate']))
-    {
-        $user->update($_POST['login'],$_POST['email'],$_POST['firstname'],$_POST['lastname']);
-    }
+    // if(isset($_POST['submitUpdate']))
+    // {
+    //     $user->update($_POST['login'],$_POST['email'],$_POST['firstname'],$_POST['lastname']);
+    // }
     
-    $user->getAllInfos();
+    // $user->getAllInfos();
 
     ?>
 </body>
