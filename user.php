@@ -32,14 +32,16 @@ class User
 
     /**
      * Ma fonction register qui permet aux utilisateurs de s'incrire sur la BDD
+     * // verifier si le user exist avec l'email
+     * //verifier si le login est déjà utilisé 
+     * // comparer les mots de passes
      */
     public function register($login, $password, $passwordConfirm, $email, $firstname, $lastname)
     {   
         // je récupère la connexion à la base de donnée qui est set dans le construct
         $bdd = $this->bdd;
 
-        // j'utilise la fonction htmlspecialchars sur les données que le user m'envoie pour
-        // s'enregistrer pour echapper tout les charactères spéciaux.
+      
         $_login = htmlspecialchars($login);
         $_password = htmlspecialchars($password);
         $_passwordConfirm = htmlspecialchars($passwordConfirm);
@@ -55,8 +57,6 @@ class User
         $email = trim($_email);
         $firstname = trim($_firstname);
         $lastname = trim($_lastname);
-
-        // j'utilise la fonction password_hash sur le mot de passe pour le hasher /!!!!!\ hashé != crypté
         $passwordhash = password_hash($password, PASSWORD_BCRYPT);
 
         // ici je commence par faire une requete pour récupérer tout les users en bdd
@@ -64,7 +64,6 @@ class User
         $query = "SELECT * FROM utilisateurs WHERE email = '$email'";
         $req = mysqli_query($bdd, $query);
 
-        // ici je vérifie que le user à bien rempli tout les champs
         if (!empty($login) && !empty($password) && !empty($passwordConfirm) && !empty($email) && !empty($firstname) && !empty($lastname)) {
             
             // ici je vérifie bien que la requete que jexecute un peu plus haut à la ligne 65 me retourne aucune ligne,
